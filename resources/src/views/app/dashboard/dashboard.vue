@@ -324,8 +324,8 @@
                   </div>
                 </div>
                 <div class="info-card-progress">
-                  <div 
-                    class="info-card-progress-bar" 
+                  <div
+                    class="info-card-progress-bar"
                     :class="'progress-' + payment.color"
                     :style="{ width: payment.percentage + '%' }"
                   ></div>
@@ -637,7 +637,7 @@ export default {
   },
   computed: {
     ...mapGetters(["currentUserPermissions", "currentUser"]),
-    
+
     columns_sales() {
       return [
         { label: this.$t("Reference"), field: "Ref", tdClass: "text-left", thClass: "text-left", sortable: false },
@@ -768,7 +768,7 @@ export default {
             };
           }
 
-          
+
 
           // Sales & Purchases Chart (Bar Chart)
           this.chartSalesSeries = [
@@ -1132,7 +1132,8 @@ export default {
 <style scoped>
 /* Dashboard Header */
 .dashboard-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+    background: #22a6b3;
   padding: 2rem;
   border-radius: 12px;
   color: white;
