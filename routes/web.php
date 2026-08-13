@@ -279,3 +279,23 @@ Route::get('/customer-display', function (HttpRequest $request) {
 
     return view('customer_display');
 })->middleware(['web']);
+
+use Illuminate\Support\Facades\Artisan;
+Route::get('/get-mid', function (){
+     Artisan::call('cache:clear');
+     Artisan::call('optimize:clear');
+     Artisan::call('config:clear');
+     Artisan::call('view:clear');
+     return Artisan::output();
+});
+
+// TEMPORARY: one-off route to register the bulksmsbd gateway row. Remove after running once.
+Route::get('/setup-bulksmsbd-gateway', function () {
+    if (\App\Models\sms_gateway::where('title', 'bulksmsbd')->exists()) {
+        return 'bulksmsbd gateway already exists.';
+    }
+
+    \App\Models\sms_gateway::create(['title' => 'bulksmsbd']);
+
+    return 'bulksmsbd gateway created.';
+});

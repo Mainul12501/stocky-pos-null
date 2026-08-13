@@ -266,7 +266,55 @@
         </b-row>
       </b-form>
 
-      
+
+    </validation-observer>
+
+     <!-- BulkSMS BD -->
+    <validation-observer ref="bulksmsbd_form_sms" v-if="!isLoading">
+      <b-form @submit.prevent="Submit_BulkSmsBD_SMS">
+        <b-row class="mt-5">
+          <b-col lg="12" md="12" sm="12">
+            <b-card no-body header="BulkSMS BD">
+              <b-card-body>
+                <b-row>
+
+                   <!-- API KEY  -->
+                  <b-col lg="6" md="6" sm="12">
+                      <b-form-group label="API KEY">
+                        <b-form-input
+                          label="SMS_BULK_SMS_BD_API_KEY"
+                          v-model="bulksmsbd.SMS_BULK_SMS_BD_API_KEY"
+                        ></b-form-input>
+                      </b-form-group>
+                  </b-col>
+
+                    <!-- SENDER ID  -->
+                  <b-col lg="6" md="6" sm="12">
+                      <b-form-group label="Sender ID">
+                        <b-form-input
+                          label="SMS_BULK_SMS_BD_SENDERID"
+                          v-model="bulksmsbd.SMS_BULK_SMS_BD_SENDERID"
+                        ></b-form-input>
+                      </b-form-group>
+                  </b-col>
+
+                  <b-col md="12">
+                    <b-form-group>
+                      <b-button variant="primary" type="submit"><i class="i-Yes me-2 font-weight-bold"></i> {{$t('submit')}}</b-button>
+                    </b-form-group>
+                  </b-col>
+                </b-row>
+
+              <p class="mt-5">
+                <strong>API KEY :</strong> Authentication key issued by BulkSMS BD (bulksmsbd.net).<br>
+
+                <strong>Sender ID :</strong> Approved sender ID/mask used for outgoing messages.<br>
+            </p>
+            </b-card-body>
+            </b-card>
+          </b-col>
+        </b-row>
+      </b-form>
     </validation-observer>
 
   </div>
@@ -304,7 +352,12 @@ export default {
         api_key:'',
         sender_from:'',
       },
-     
+
+      bulksmsbd:{
+        SMS_BULK_SMS_BD_API_KEY:'',
+        SMS_BULK_SMS_BD_SENDERID:'',
+      },
+
     };
   },
 
@@ -369,6 +422,21 @@ export default {
           );
         } else {
             this.update_infobip_config();
+        }
+      });
+    },
+
+     //------------- Submit Validation SMS
+    Submit_BulkSmsBD_SMS() {
+      this.$refs.bulksmsbd_form_sms.validate().then(success => {
+        if (!success) {
+          this.makeToast(
+            "danger",
+            this.$t("Please_fill_the_form_correctly"),
+            this.$t("Failed")
+          );
+        } else {
+            this.update_bulksmsbd_config();
         }
       });
     },
@@ -486,7 +554,29 @@ export default {
         });
     },
 
-
+    //---------------------------------- update_bulksmsbd_config ----------------\\
+    update_bulksmsbd_config() {
+      NProgress.start();
+      NProgress.set(0.1);
+      axios
+        .post("update_bulksmsbd_config",{
+          SMS_BULK_SMS_BD_API_KEY: this.bulksmsbd.SMS_BULK_SMS_BD_API_KEY,
+          SMS_BULK_SMS_BD_SENDERID: this.bulksmsbd.SMS_BULK_SMS_BD_SENDERID,
+        })
+        .then(response => {
+          Fire.$emit("Event_sms");
+          this.makeToast(
+            "success",
+            this.$t("Successfully_Updated"),
+            this.$t("Success")
+          );
+          NProgress.done();
+        })
+        .catch(error => {
+          NProgress.done();
+          this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
+        });
+    },
 
      //---------------------------------- get_sms_config ----------------\\
     get_sms_config() {
@@ -496,6 +586,7 @@ export default {
           this.twilio = response.data.twilio;
           this.termi = response.data.termi;
           this.infobip = response.data.infobip;
+          this.bulksmsbd = response.data.bulksmsbd;
           this.sms_gateway = response.data.sms_gateway;
           this.default_sms_gateway = response.data.default_sms_gateway;
           this.isLoading = false;

@@ -9,10 +9,10 @@
       <div class="vertical-sidebar-header">
         <div class="header-brand" @click="navigateToDashboard">
           <div class="sidebar-logo">
-            <img
-              v-if="currentUser && currentUser.logo"
-              :src="'/images/' + currentUser.logo"
-              alt="logo"
+            <img 
+              v-if="currentUser && currentUser.logo" 
+              :src="'/images/' + currentUser.logo" 
+              alt="logo" 
               class="logo-image"
             />
             <div v-else class="logo-placeholder">
@@ -29,7 +29,7 @@
       <nav class="vertical-nav-menu">
         <ul class="nav-list">
           <!-- Dashboard -->
-          <li
+          <li 
             :class="{ active: isActiveRoute('dashboard') }"
             class="nav-item"
           >
@@ -249,7 +249,7 @@
                   <span>Import (Update Only)</span>
                 </router-link>
               </li>
-
+              
               <li class="submenu-item" v-if="currentUserPermissions && currentUserPermissions.includes('opening_stock_import')">
                 <router-link to="/app/products/opening_stock_import" class="submenu-link">
                   <i class="submenu-icon i-Add-File"></i>
@@ -736,7 +736,7 @@
           </li>
 
 
-
+          
 
           <!-- Subscription Product -->
           <li
@@ -880,7 +880,7 @@
           </li>
 
            <!-- woocommerce_settings -->
-           <li
+           <li 
            v-if="currentUserPermissions && currentUserPermissions.includes('woocommerce_settings')"
             :class="{ active: isActiveRoute('woocommerce_settings') }"
             class="nav-item"
@@ -891,10 +891,10 @@
             </router-link>
           </li>
 
-
+          
           <!-- Settings -->
           <li
-            v-show="currentUserPermissions && (
+            v-show="currentUserPermissions && (  
               currentUserPermissions.includes('setting_system') ||
               currentUserPermissions.includes('update_settings') ||
               currentUserPermissions.includes('sms_settings') ||
@@ -928,8 +928,8 @@
                 </router-link>
               </li>
 
-
-
+             
+             
               <li class="submenu-item" v-if="currentUserPermissions && currentUserPermissions.includes('quickbooks_settings')">
                 <router-link to="/app/settings/quickbooks_sync" class="submenu-link">
                   <i class="submenu-icon i-Money-2"></i>
@@ -1036,7 +1036,7 @@
                 </router-link>
               </li>
 
-
+              
             </ul>
           </li>
 
@@ -1364,11 +1364,11 @@
         </ul>
       </nav>
     </vue-perfect-scrollbar>
-
+    
     <!-- Mobile Overlay -->
-    <div
-      v-if="mobileOpen && isMobile"
-      class="mobile-overlay"
+    <div 
+      v-if="mobileOpen && isMobile" 
+      class="mobile-overlay" 
       @click="closeMobileSidebar"
     ></div>
   </div>
@@ -1380,7 +1380,7 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "VerticalSidebar",
-
+  
   data() {
     return {
       isMobile,
@@ -1408,7 +1408,7 @@ export default {
       console.log('VerticalSidebar: Event received!');
       console.log('Window width:', window.innerWidth);
       console.log('Current mobileOpen state:', this.mobileOpen);
-
+      
       if (window.innerWidth <= 768) {
         // On mobile, toggle sidebar visibility and ensure text visible
         this.mobileOpen = !this.mobileOpen;
@@ -1492,7 +1492,7 @@ export default {
 
     toggleSubmenu(menu) {
       if (this.isCollapsed) return;
-
+      
       const index = this.openMenus.indexOf(menu);
       if (index > -1) {
         this.openMenus.splice(index, 1);
@@ -1513,7 +1513,7 @@ export default {
     initializeActiveMenu() {
       const path = this.$route.path;
       const segments = path.split('/').filter(x => x !== '');
-
+      
       if (segments.length >= 2) {
         const parentMenu = segments[1].toLowerCase();
         if (!this.openMenus.includes(parentMenu)) {
@@ -1703,15 +1703,7 @@ export default {
 }
 
 .nav-item.active > .nav-link {
-    /*
-    //background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); // menu active bg color
-    //background: linear-gradient(
-    //    135deg,
-    //    #22a6b3 0%,
-    //    #7ed6df 55%,
-    //    #c7ecee 100%
-    //); */
-    background: #22a6b3;
+  background: #22a6b3;
   color: white;
 }
 
