@@ -101,18 +101,6 @@
       0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
-  'xenon/laravelbdsms' => 
-  array (
-    'aliases' => 
-    array (
-      'SMS' => 'Xenon\\LaravelBDSms\\Facades\\SMS',
-      'LaravelBDSms' => 'Xenon\\LaravelBDSms\\Facades\\SMS',
-    ),
-    'providers' => 
-    array (
-      0 => 'Xenon\\LaravelBDSms\\LaravelBDSmsServiceProvider',
-    ),
-  ),
   'yajra/laravel-datatables-oracle' => 
   array (
     'aliases' => 

@@ -1,8 +1,10 @@
 /public/hot
-#/public/js/bundle
-#/public/images/vendor
-#/public/js/main.js
+
+/public/js/bundle
+/public/images/vendor
+/public/js/main.js
 /node_modules
+/public/hot
 /public/storage
 /storage/*.key
 /storage/framework/sessions
@@ -16,5 +18,3 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-/.idea
-/.claude

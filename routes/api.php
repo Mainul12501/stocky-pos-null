@@ -746,7 +746,6 @@ Route::middleware(['auth:api', 'Is_Active', 'request.safety', 'token.timeout'])-
     Route::post('update_nexmo_config', 'Sms_SettingsController@update_nexmo_config');
     Route::post('update_infobip_config', 'Sms_SettingsController@update_infobip_config');
     Route::post('update_termi_config', 'Sms_SettingsController@update_termi_config');
-    Route::post('update_bulksmsbd_config', 'Sms_SettingsController@update_bulksmsbd_config');
 
     Route::put('update_Default_SMS', 'Sms_SettingsController@update_Default_SMS');
 

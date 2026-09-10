@@ -2,12 +2,12 @@
   <div class="main-content">
     <breadcumb :page="$t('Printbarcode')" :folder="$t('Products')"/>
     <div v-if="isLoading" class="loading_page spinner spinner-primary mr-3"></div>
-    
+
     <div v-if="!isLoading" class="barcode-container">
       <b-modal hide-footer id="open_scan" size="md" title="Barcode Scanner">
         <qrcode-scanner
-          :qrbox="250" 
-          :fps="10" 
+          :qrbox="250"
+          :fps="10"
           style="width: 100%; height: calc(100vh - 56px);"
           @result="onScan"
         />
@@ -133,9 +133,9 @@
                   <button type="button" class="scan-btn" @click="showModal" :title="$t('Scan_Barcode') || 'Scan Barcode'">
                     <i class="i-QR-Code"></i>
                   </button>
-                  <input 
+                  <input
                     :placeholder="$t('Scan_Search_Product_by_Code_Name')"
-                    @input='e => search_input = e.target.value' 
+                    @input='e => search_input = e.target.value'
                     @keyup="search(search_input)"
                     @focus="handleFocus"
                     @blur="handleBlur"
@@ -210,8 +210,8 @@
                         >
                       </td>
                       <td class="text-center">
-                        <button 
-                          @click="delete_Product(product.code)" 
+                        <button
+                          @click="delete_Product(product.code)"
                           class="btn btn-sm btn-outline-danger delete-btn"
                           :title="$t('Delete')"
                         >
@@ -263,10 +263,14 @@
                         :value="barcode.barcode"
                         textmargin="0"
                         fontoptions="bold"
-                        fontSize="15"
-                        height="25"
+                        :fontSize="isStickerSize ? 12 : 15"
+                        :height="isStickerSize ? 20 : 25"
                         width="1"
                       ></barcode>
+                        <!-- ADD THIS -->
+                        <div class="barcode-company" v-if="currentUser && currentUser.company">
+                            {{ currentUser.company }}
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -307,7 +311,7 @@ export default {
       total_a4:'',
       class_sheet:'',
       class_type_page:'',
-      rest:'',     
+      rest:'',
       warehouses: [],
       submitStatus: null,
       show_price:true,
@@ -331,12 +335,16 @@ export default {
 
   computed: {
     ...mapGetters(["currentUser"]),
+    isStickerSize() {
+      return this.paper_size === 'customstyle' ||
+             (typeof this.paper_size === 'string' && this.paper_size.startsWith('sticker_'));
+    },
     canGenerateBarcodes() {
-      const hasPaperSize = this.paper_size && 
-                          (this.sheets > 0 || 
-                           this.paper_size === 'customstyle' || 
+      const hasPaperSize = this.paper_size &&
+                          (this.sheets > 0 ||
+                           this.paper_size === 'customstyle' ||
                            (this.paper_size && this.paper_size.startsWith('sticker_')));
-      return this.products_added.length > 0 && 
+      return this.products_added.length > 0 &&
              hasPaperSize &&
              this.barcode.warehouse_id;
     }
@@ -426,7 +434,7 @@ export default {
 
     showModal() {
       this.$bvModal.show('open_scan');
-      
+
     },
 
     onScan (decodedText, decodedResult) {
@@ -485,7 +493,7 @@ export default {
         this.sheets = 1;
         this.class_sheet = 'customstyle';
         this.class_type_page = 'barcode_custom';
-        
+
         // Extract dimensions from option
         const option = this.getPaperSizeOptions().find(opt => opt.value === value);
         if (option && option.width && option.height) {
@@ -494,9 +502,9 @@ export default {
           this.applyCustomStickerDimensions();
         }
       }
-     
+
       this.Per_Page();
-      
+
       // Force regeneration when paper size changes (skip auto-print so user can preview first)
       this.$nextTick(() => {
         if (this.canGenerateBarcodes) {
@@ -519,7 +527,7 @@ export default {
         {label: '12 per sheet (a4) (2.5 * 2.834)', value: 'style12'},
         {label: '10 per sheet (4 * 2)', value: 'style10'},
       ];
-      
+
       // Add sticker size options
       const stickerOptions = [
         {label: 'Stickers - 50mm x 25mm', value: 'sticker_50x25', width: 50, height: 25},
@@ -539,7 +547,7 @@ export default {
         {label: 'Stickers - 105mm x 74mm', value: 'sticker_105x74', width: 105, height: 74},
         {label: 'Stickers - 148mm x 105mm (A5)', value: 'sticker_148x105', width: 148, height: 105},
       ];
-      
+
       // Add sticker options to base options
       stickerOptions.forEach(option => {
         baseOptions.push({
@@ -549,10 +557,10 @@ export default {
           height: option.height
         });
       });
-      
+
       // Add custom sticker option
       baseOptions.push({label: 'Stickers - Custom Value', value: 'customstyle'});
-      
+
       return baseOptions;
     },
     // Update custom sticker label in options
@@ -564,36 +572,132 @@ export default {
         }
       }
     },
-    // Apply custom sticker dimensions to CSS
+    // Apply custom sticker dimensions to CSS (preview only - scoped to .barcode_custom,
+    // so the other paper sizes, which render as .barcodea4 / .barcode_non_a4, are never touched)
     applyCustomStickerDimensions() {
       this.$nextTick(() => {
         const styleId = 'custom-sticker-dimensions';
         let styleElement = document.getElementById(styleId);
-        
+
         if (!styleElement) {
           styleElement = document.createElement('style');
           styleElement.id = styleId;
           document.head.appendChild(styleElement);
         }
-        
+
         const widthMM = this.custom_sticker_width || 50;
         const heightMM = this.custom_sticker_height || 25;
-        
-        // Convert mm to CSS units (1mm = 3.7795275590551px, but we'll use mm directly)
+
+        // Use min-height (not a fixed height) so a label always grows to contain its
+        // contents instead of letting name / barcode / company spill past the border
+        // and overlap the next sticker in the preview grid. overflow:hidden + the JS
+        // fitStickerBarcodes() scaler keep the barcode within the label width.
         styleElement.textContent = `
-          .barcode_custom {
+          .barcode-row .barcode_custom {
             width: ${widthMM}mm !important;
-            height: ${heightMM}mm !important;
+            min-height: ${heightMM}mm !important;
+            height: auto !important;
+            box-sizing: border-box !important;
+            border: 1px dashed #cbd5e1 !important;
+            margin: 0 auto 8px auto !important;
+            padding: 1.5mm 1mm !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+          }
+          .barcode-row .barcode_custom .barcode-item {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            align-items: center;
+            justify-content: center;
+          }
+          .barcode-row .barcode_custom .head_barcode {
+            width: 100%;
+            padding-left: 0 !important;
+            text-align: center !important;
+            font-size: 9px !important;
+            line-height: 1.15 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .barcode-row .barcode_custom .barcode { max-width: 100%; }
+          .barcode-row .barcode_custom .barcode-company {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
           }
         `;
+
+        this.fitStickerBarcodes();
+      });
+    },
+
+    // Scale down each sticker barcode so it fits inside the label width. Only runs for
+    // the custom / predefined sticker sizes; every other paper size returns immediately
+    // and no element outside .barcode_custom is ever read or modified.
+    fitStickerBarcodes(targetDoc) {
+      const isSticker = this.paper_size === 'customstyle' ||
+                        (this.paper_size && this.paper_size.startsWith('sticker_'));
+      if (!isSticker) return;
+
+      const doc = targetDoc || document;
+      const view = doc.defaultView || window;
+
+      const run = () => {
+        const items = doc.querySelectorAll('.barcode_custom .barcode-item');
+        items.forEach(item => {
+          const wrap = item.querySelector('.barcode');
+          if (!wrap) return;
+          const svg = wrap.querySelector('svg');
+          if (!svg) return;
+
+          // reset any previous scaling before measuring
+          wrap.style.transform = 'none';
+          wrap.style.height = 'auto';
+          wrap.style.width = 'auto';
+
+          let padX = 0;
+          try {
+            const cs = view.getComputedStyle(item);
+            padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+          } catch (e) { padX = 0; }
+
+          const avail = item.clientWidth - padX - 2;
+          const rect = svg.getBoundingClientRect();
+          const naturalW = rect.width || parseFloat(svg.getAttribute('width')) || 0;
+          const naturalH = rect.height || parseFloat(svg.getAttribute('height')) || 0;
+
+          if (naturalW > 0 && avail > 0 && naturalW > avail) {
+            const scale = avail / naturalW;
+            // pin the wrapper to the barcode's natural size so the parent's
+            // flex centering keeps it centred, then shrink it in place
+            wrap.style.display = 'block';
+            wrap.style.width = naturalW + 'px';
+            wrap.style.height = (naturalH || 0) + 'px';
+            wrap.style.transformOrigin = 'top center';
+            wrap.style.transform = 'scale(' + scale + ')';
+            wrap.style.marginBottom = naturalH ? ((naturalH * scale) - naturalH) + 'px' : '0';
+          }
+        });
+      };
+
+      // the barcode <svg> may not be laid out on the first paint
+      this.$nextTick(() => {
+        run();
+        setTimeout(run, 150);
       });
     },
     //------ Auto Generate Barcodes
     autoGenerateBarcodes(skipAutoPrint = false) {
       if (this.isGenerating) return;
-      
+
       this.isGenerating = true;
-      
+
       // Clear any pending print timeout
       if (this.printTimeout) {
         clearTimeout(this.printTimeout);
@@ -605,7 +709,8 @@ export default {
         if (this.canGenerateBarcodes) {
           this.generatePages();
           this.ShowCard = true;
-          
+          this.fitStickerBarcodes();
+
           // Auto-print after a short delay if enabled and not skipped
           if (this.auto_print && this.pages.length > 0 && !skipAutoPrint) {
             this.printTimeout = setTimeout(() => {
@@ -615,7 +720,7 @@ export default {
         } else {
           this.ShowCard = false;
         }
-        
+
         this.isGenerating = false;
       });
     },
@@ -656,7 +761,7 @@ export default {
         }
       }
     },
-    
+
    // Search Products
     search(){
       if (this.timer) {
@@ -676,7 +781,7 @@ export default {
                 this.product_filter=  this.products.filter(product => {
 
                   return tokens.every(token =>
-                      product.name.toLowerCase().includes(token) 
+                      product.name.toLowerCase().includes(token)
                       ||  product.code.toLowerCase().includes(token)
                       ||  product.barcode.toLowerCase().includes(token)
                       ||  (product.note && product.note.toLowerCase().includes(token))
@@ -711,7 +816,7 @@ export default {
     getResultValue(result) {
       return result.code + " " + "(" + result.name + ")";
     },
-   
+
      //------ Submit Search Product
      SearchProduct(result) {
       const existingProduct = this.products_added.find(product => product.code === result.code);
@@ -763,16 +868,117 @@ export default {
       a.document.write(
         '<link rel="stylesheet" href="/assets_setup/css/print_label.css"><html>'
       );
+
+      // The print window is a brand new document - it doesn't inherit the dynamic
+      // sticker size injected into the main page's <head>, so print_label.css would
+      // otherwise fall back to its default 50mm x 25mm .barcode_custom box (a fixed
+      // height with no clipping, so long content spilled past the border and the
+      // next label overlapped it). Emit a full, self-contained sticker stylesheet:
+      // one label per physical page at the exact selected size, contents clipped to
+      // the label and horizontally scaled by fitStickerBarcodes() below. This block
+      // only targets .barcode_custom, so the sheet paper sizes (.barcodea4 /
+      // .barcode_non_a4) keep using print_label.css unchanged.
+      var isSticker = this.paper_size === 'customstyle' ||
+                      (this.paper_size && this.paper_size.startsWith('sticker_'));
+
+      if (isSticker) {
+        const widthMM = this.custom_sticker_width || 50;
+        const heightMM = this.custom_sticker_height || 25;
+        a.document.write(`<style>
+          @page { size: ${widthMM}mm ${heightMM}mm; margin: 0; }
+          html, body { margin: 0 !important; padding: 0 !important; }
+          body > div { margin: 0 !important; padding: 0 !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .barcode_custom {
+            width: ${widthMM}mm !important;
+            height: ${heightMM}mm !important;
+            min-height: ${heightMM}mm !important;
+            box-sizing: border-box !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0.8mm 1mm !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+          }
+          body > div:last-child .barcode_custom { page-break-after: auto !important; }
+          .barcode_custom .barcode-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            border: none !important;
+            float: none !important;
+            box-sizing: border-box !important;
+            color: #000 !important;
+          }
+          .barcode_custom .head_barcode {
+            order: 1;
+            width: 100%;
+            text-align: center !important;
+            padding: 0 !important;
+            font-weight: bold !important;
+            color: #000 !important;
+          }
+          .barcode_custom .head_barcode .barcode-name {
+            display: block;
+            width: 100%;
+            font-size: 7pt !important;
+            line-height: 1.05 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .barcode_custom .head_barcode .barcode-price {
+            display: block;
+            width: 100%;
+            font-size: 7pt !important;
+            line-height: 1.1 !important;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0.3mm 0; }
+          .barcode_custom .barcode svg { display: block; max-width: 100%; }
+          .barcode_custom .barcode-company {
+            order: 3;
+            width: 100%;
+            text-align: center;
+            font-size: 6pt !important;
+            font-weight: bold !important;
+            color: #000 !important;
+            line-height: 1.05 !important;
+            white-space: normal;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-break: break-word;
+          }
+        </style>`);
+      }
+
       a.document.write("<body >");
       a.document.write(divContents);
       a.document.write("</body></html>");
       a.document.close();
 
       setTimeout(() => {
-         a.print();
+        if (isSticker) {
+          this.fitStickerBarcodes(a.document);
+          setTimeout(() => a.print(), 350);
+        } else {
+          a.print();
+        }
       }, 1000);
 
-      
+
     },
 
     generatePages() {
@@ -793,7 +999,7 @@ export default {
         this.pages.push(allBarcodes.splice(0, this.sheets));
       }
     },
-   
+
     //-------------------------------------- Show Barcode -------------------------\\
     showBarcode() {
       // this.Per_Page();
@@ -842,19 +1048,19 @@ export default {
       this.pages = [];
       this.custom_sticker_width = 50;
       this.custom_sticker_height = 25;
-      
+
       // Clear any pending print timeout
       if (this.printTimeout) {
         clearTimeout(this.printTimeout);
         this.printTimeout = null;
       }
-      
+
       // Remove custom style
       const styleElement = document.getElementById('custom-sticker-dimensions');
       if (styleElement) {
         styleElement.remove();
       }
-      
+
       // Reset sheets for sticker sizes
       if (this.paper_size && this.paper_size.startsWith('sticker_')) {
         this.sheets = 1;
@@ -1213,6 +1419,63 @@ export default {
     border-radius: 6px;
     border: 1px solid #e5e7eb;
   }
+
+  .barcode-company {
+      display: block;
+      text-align: center;
+      font-weight: bold;
+      font-size: 10px;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-top: 1px;
+  }
+
+  /*
+   * The per-style label heights (defined globally in the theme) are sized for
+   * name + barcode only, and clip anything extra via overflow:hidden. Instead of
+   * hard-coding a taller height per paper size, let every label grow to fit its
+   * own contents (name + barcode + company name) and keep the theme's designed
+   * size only as a minimum so the preview grid still lines up. This adapts to
+   * any paper size automatically.
+   *
+   * Stacking is forced with flexbox (column, top-packed) rather than relying on
+   * plain block flow, because the sticker/custom paper sizes ("barcode_custom")
+   * have no theme rules at all for .barcode-item - without an explicit order the
+   * company name can end up looking centered in the leftover label space instead
+   * of sitting right under the barcode number.
+   */
+  .barcode-row .barcode-item {
+    display: flex !important;
+    flex-direction: column;
+    overflow: visible;
+    height: auto !important;
+    padding-bottom: 3px;
+  }
+
+  .barcode-row .barcode-item .barcode {
+    display: block;
+    text-align: center;
+    order: 2;
+  }
+
+  .barcode-row .barcode-item .head_barcode {
+    order: 1;
+  }
+
+  .barcode-row .barcode-item .barcode-company {
+    order: 3;
+    margin-top: 0;
+  }
+
+  .barcode-row .barcodea4 .style40 { min-height: 1.003in; }
+  .barcode-row .barcodea4 .style24 { min-height: 1.335in; }
+  .barcode-row .barcodea4 .style18 { min-height: 1.835in; }
+  .barcode-row .barcodea4 .style12 { min-height: 2.834in; }
+
+  .barcode-row .barcode_non_a4 .style30 { min-height: 1in; }
+  .barcode-row .barcode_non_a4 .style20 { min-height: 1in; }
+  .barcode-row .barcode_non_a4 .style14 { min-height: 1.33in; }
+  .barcode-row .barcode_non_a4 .style10 { min-height: 2in; }
 
   /* Form Group Labels */
   ::v-deep .form-group label {

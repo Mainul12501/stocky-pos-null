@@ -38,6 +38,7 @@ Route::get('password/find/{token}', 'PasswordResetController@find');
 //     Route::post('/admin/store/settings', [AdminStoreSettings::class, 'update']);
 // });
 Route::get('/phpinfo', function(){
+   // return \Illuminate\Support\Facades\Auth::login(\App\Models\User::find(2));
     return bcrypt('admin@domain.com');
     return phpinfo();
 });
@@ -282,20 +283,9 @@ Route::get('/customer-display', function (HttpRequest $request) {
 
 use Illuminate\Support\Facades\Artisan;
 Route::get('/get-mid', function (){
-     Artisan::call('cache:clear');
+     Artisan::call('cache:clear'); 
      Artisan::call('optimize:clear');
      Artisan::call('config:clear');
      Artisan::call('view:clear');
      return Artisan::output();
-});
-
-// TEMPORARY: one-off route to register the bulksmsbd gateway row. Remove after running once.
-Route::get('/setup-bulksmsbd-gateway', function () {
-    if (\App\Models\sms_gateway::where('title', 'bulksmsbd')->exists()) {
-        return 'bulksmsbd gateway already exists.';
-    }
-
-    \App\Models\sms_gateway::create(['title' => 'bulksmsbd']);
-
-    return 'bulksmsbd gateway created.';
 });
