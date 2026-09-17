@@ -253,24 +253,23 @@
                 <div v-for="(page, pageIndex) in pages" :key="pageIndex">
                   <div :class="class_type_page">
                     <div class="barcode-item" :class="class_sheet" v-for="(barcode, index) in page" :key="index">
-                      <div class="head_barcode text-left" style="padding-left: 10px; font-weight: bold;font-size: 10px;">
-                        <span class="barcode-name">{{barcode.name}}</span>
-                        <span class="barcode-price" v-if="show_price">{{currentUser.currency}} {{barcode.Net_price}}</span>
+                      <div class="barcode-company" v-if="currentUser && currentUser.company">
+                        {{ currentUser.company }}
                       </div>
                       <barcode
                         class="barcode"
                         :format="barcode.Type_barcode"
                         :value="barcode.barcode"
                         textmargin="0"
-                        fontoptions="bold"
-                        :fontSize="isStickerSize ? 12 : 15"
+                        fontoptions=""
+                        :fontSize="isStickerSize ? 10 : 12"
                         :height="isStickerSize ? 20 : 25"
                         width="1"
                       ></barcode>
-                        <!-- ADD THIS -->
-                        <div class="barcode-company" v-if="currentUser && currentUser.company">
-                            {{ currentUser.company }}
-                        </div>
+                      <div class="head_barcode text-center">
+                        <span class="barcode-price" v-if="show_price">{{currentUser.currency}} {{barcode.Net_price}}</span>
+                        <span class="barcode-name">{{barcode.name}}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -919,39 +918,12 @@ export default {
             box-sizing: border-box !important;
             color: #000 !important;
           }
-          .barcode_custom .head_barcode {
+          .barcode_custom .barcode-company {
             order: 1;
             width: 100%;
-            text-align: center !important;
-            padding: 0 !important;
-            font-weight: bold !important;
-            color: #000 !important;
-          }
-          .barcode_custom .head_barcode .barcode-name {
-            display: block;
-            width: 100%;
-            font-size: 7pt !important;
-            line-height: 1.05 !important;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .barcode_custom .head_barcode .barcode-price {
-            display: block;
-            width: 100%;
-            font-size: 7pt !important;
-            line-height: 1.1 !important;
-            white-space: nowrap;
-            overflow: hidden;
-          }
-          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0.3mm 0; }
-          .barcode_custom .barcode svg { display: block; max-width: 100%; }
-          .barcode_custom .barcode-company {
-            order: 3;
-            width: 100%;
             text-align: center;
-            font-size: 6pt !important;
-            font-weight: bold !important;
+            font-size: 8pt !important;
+            font-weight: 800 !important;
             color: #000 !important;
             line-height: 1.05 !important;
             white-space: normal;
@@ -960,6 +932,34 @@ export default {
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             word-break: break-word;
+          }
+          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0.3mm 0; }
+          .barcode_custom .barcode svg { display: block; max-width: 100%; }
+          .barcode_custom .head_barcode {
+            order: 3;
+            width: 100%;
+            text-align: center !important;
+            padding: 0 !important;
+            color: #000 !important;
+          }
+          .barcode_custom .head_barcode .barcode-price {
+            display: block;
+            width: 100%;
+            font-size: 7pt !important;
+            font-weight: 800 !important;
+            line-height: 1.1 !important;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+          .barcode_custom .head_barcode .barcode-name {
+            display: block;
+            width: 100%;
+            font-size: 6pt !important;
+            font-weight: normal !important;
+            line-height: 1.05 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         </style>`);
       }
@@ -1423,8 +1423,8 @@ export default {
   .barcode-company {
       display: block;
       text-align: center;
-      font-weight: bold;
-      font-size: 10px;
+      font-weight: 800;
+      font-size: 11px;
       text-transform: uppercase;
       line-height: 1.1;
       margin-top: 1px;
@@ -1452,6 +1452,11 @@ export default {
     padding-bottom: 3px;
   }
 
+  .barcode-row .barcode-item .barcode-company {
+    order: 1;
+    margin-top: 0;
+  }
+
   .barcode-row .barcode-item .barcode {
     display: block;
     text-align: center;
@@ -1459,12 +1464,17 @@ export default {
   }
 
   .barcode-row .barcode-item .head_barcode {
-    order: 1;
+    order: 3;
   }
 
-  .barcode-row .barcode-item .barcode-company {
-    order: 3;
-    margin-top: 0;
+  .barcode-row .barcode-item .barcode-price {
+    font-weight: 800;
+    font-size: 10px;
+  }
+
+  .barcode-row .barcode-item .barcode-name {
+    font-weight: normal;
+    font-size: 8px;
   }
 
   .barcode-row .barcodea4 .style40 { min-height: 1.003in; }
