@@ -262,8 +262,8 @@
                         :value="barcode.barcode"
                         textmargin="0"
                         fontoptions=""
-                        :fontSize="isStickerSize ? 10 : 12"
-                        :height="isStickerSize ? 20 : 25"
+                        :fontSize="isSmallSticker ? 8 : (isStickerSize ? 10 : 12)"
+                        :height="isSmallSticker ? 15 : (isStickerSize ? 20 : 25)"
                         width="1"
                       ></barcode>
                       <div class="head_barcode text-center">
@@ -337,6 +337,9 @@ export default {
     isStickerSize() {
       return this.paper_size === 'customstyle' ||
              (typeof this.paper_size === 'string' && this.paper_size.startsWith('sticker_'));
+    },
+    isSmallSticker() {
+      return this.isStickerSize && (this.custom_sticker_width <= 40 || this.custom_sticker_height <= 25);
     },
     canGenerateBarcodes() {
       const hasPaperSize = this.paper_size &&
@@ -529,6 +532,8 @@ export default {
 
       // Add sticker size options
       const stickerOptions = [
+        {label: 'Stickers - 35mm x 25mm', value: 'sticker_35x25', width: 35, height: 25},
+        {label: 'Stickers - 38mm x 25mm', value: 'sticker_38x25', width: 38, height: 25},
         {label: 'Stickers - 50mm x 25mm', value: 'sticker_50x25', width: 50, height: 25},
         {label: 'Stickers - 50mm x 30mm', value: 'sticker_50x30', width: 50, height: 30},
         {label: 'Stickers - 53mm x 32mm (Avery 22806)', value: 'sticker_53x32', width: 53, height: 32},
@@ -626,6 +631,9 @@ export default {
           .barcode-row .barcode_custom .barcode { max-width: 100%; }
           .barcode-row .barcode_custom .barcode-company {
             width: 100%;
+            font-family: 'Pirata One', cursive;
+            font-weight: 400;
+            font-size: ${(widthMM <= 40 || heightMM <= 25) ? '11px' : '14px'} !important;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -865,6 +873,9 @@ export default {
       var divContents = document.getElementById("print_barcode_label").innerHTML;
       var a = window.open("", "", "height=500, width=500");
       a.document.write(
+        '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+        '<link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">' +
         '<link rel="stylesheet" href="/assets_setup/css/print_label.css"><html>'
       );
 
@@ -883,6 +894,14 @@ export default {
       if (isSticker) {
         const widthMM = this.custom_sticker_width || 50;
         const heightMM = this.custom_sticker_height || 25;
+
+        // Scale font sizes for small stickers
+        const isSmall = widthMM <= 40 || heightMM <= 25;
+        const companyFontSize = isSmall ? '8pt' : '10pt';
+        const priceFontSize = isSmall ? '6pt' : '7pt';
+        const nameFontSize = isSmall ? '5pt' : '6pt';
+        const barcodeMargin = isSmall ? '0.1mm 0' : '0.3mm 0';
+
         a.document.write(`<style>
           @page { size: ${widthMM}mm ${heightMM}mm; margin: 0; }
           html, body { margin: 0 !important; padding: 0 !important; }
@@ -895,10 +914,10 @@ export default {
             box-sizing: border-box !important;
             border: none !important;
             margin: 0 !important;
-            padding: 0.8mm 1mm !important;
+            padding: 0.5mm 0.5mm !important;
             overflow: hidden !important;
             display: flex !important;
-            align-items: center !important;
+            align-items: flex-start !important;
             justify-content: center !important;
             page-break-after: always !important;
             page-break-inside: avoid !important;
@@ -908,7 +927,7 @@ export default {
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            justify-content: center !important;
+            justify-content: flex-start !important;
             width: 100% !important;
             max-width: 100% !important;
             height: 100% !important;
@@ -922,39 +941,42 @@ export default {
             order: 1;
             width: 100%;
             text-align: center;
-            font-size: 8pt !important;
-            font-weight: 800 !important;
+            font-family: 'Pirata One', cursive !important;
+            font-size: ${companyFontSize} !important;
+            font-weight: 400 !important;
             color: #000 !important;
-            line-height: 1.05 !important;
-            white-space: normal;
+            line-height: 1 !important;
+            margin-bottom: -1px !important;
+            white-space: nowrap;
             overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            word-break: break-word;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
           }
-          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0.3mm 0; }
-          .barcode_custom .barcode svg { display: block; max-width: 100%; }
+          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0 !important; flex-shrink: 1; min-height: 0; }
+          .barcode_custom .barcode svg { display: block; max-width: 100%; margin: 0 auto; }
           .barcode_custom .head_barcode {
             order: 3;
             width: 100%;
             text-align: center !important;
             padding: 0 !important;
+            margin-top: -2px !important;
             color: #000 !important;
+            flex-shrink: 0;
           }
           .barcode_custom .head_barcode .barcode-price {
             display: block;
             width: 100%;
-            font-size: 7pt !important;
+            font-size: ${priceFontSize} !important;
             font-weight: 800 !important;
-            line-height: 1.1 !important;
+            line-height: 1 !important;
+            margin-top: 0 !important;
             white-space: nowrap;
             overflow: hidden;
           }
           .barcode_custom .head_barcode .barcode-name {
             display: block;
             width: 100%;
-            font-size: 6pt !important;
+            font-size: ${nameFontSize} !important;
             font-weight: normal !important;
             line-height: 1.05 !important;
             white-space: nowrap;
@@ -969,14 +991,15 @@ export default {
       a.document.write("</body></html>");
       a.document.close();
 
+      // Wait for Google Font to load before printing
       setTimeout(() => {
         if (isSticker) {
           this.fitStickerBarcodes(a.document);
-          setTimeout(() => a.print(), 350);
+          setTimeout(() => a.print(), 500);
         } else {
           a.print();
         }
-      }, 1000);
+      }, 1500);
 
 
     },
@@ -1423,11 +1446,13 @@ export default {
   .barcode-company {
       display: block;
       text-align: center;
-      font-weight: 800;
-      font-size: 11px;
+      font-family: 'Pirata One', cursive;
+      font-weight: 400;
+      font-size: 15px;
       text-transform: uppercase;
-      line-height: 1.1;
+      line-height: 1;
       margin-top: 1px;
+      margin-bottom: -2px;
   }
 
   /*
@@ -1461,15 +1486,26 @@ export default {
     display: block;
     text-align: center;
     order: 2;
+    margin-bottom: -1px;
+  }
+
+  .barcode-row .barcode-item .barcode svg {
+    display: block;
+    margin: 0 auto;
   }
 
   .barcode-row .barcode-item .head_barcode {
     order: 3;
+    line-height: 1.1;
+    margin-top: 0;
+    padding-top: 0;
   }
 
   .barcode-row .barcode-item .barcode-price {
     font-weight: 800;
     font-size: 10px;
+    line-height: 1.1;
+    margin-top: 0;
   }
 
   .barcode-row .barcode-item .barcode-name {
@@ -1486,6 +1522,12 @@ export default {
   .barcode-row .barcode_non_a4 .style20 { min-height: 1in; }
   .barcode-row .barcode_non_a4 .style14 { min-height: 1.33in; }
   .barcode-row .barcode_non_a4 .style10 { min-height: 2in; }
+
+  /* Scale company name font for larger label sizes */
+  .barcode-row .barcodea4 .style18 .barcode-company,
+  .barcode-row .barcode_non_a4 .style14 .barcode-company { font-size: 16px; }
+  .barcode-row .barcodea4 .style12 .barcode-company,
+  .barcode-row .barcode_non_a4 .style10 .barcode-company { font-size: 18px; }
 
   /* Form Group Labels */
   ::v-deep .form-group label {

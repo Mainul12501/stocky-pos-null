@@ -36,10 +36,31 @@
 .barcode-company{
 	display: block;
 	text-align: center;
-	font-weight: 800;
-	font-size: 11px;
+	font-family: 'Pirata One', cursive;
+	font-weight: 400;
+	font-size: 14px;
 	text-transform: uppercase;
-	line-height: 1.1;
+	line-height: 1;
+	margin-bottom: -2px;
+}
+
+.barcode svg{
+	display: block;
+	margin: 0 auto;
+}
+
+.barcode-item .barcode{
+	margin-bottom: -1px;
+}
+
+.barcodea4 .style18 .barcode-company,
+.barcode_non_a4 .style14 .barcode-company{
+	font-size: 16px;
+}
+
+.barcodea4 .style12 .barcode-company,
+.barcode_non_a4 .style10 .barcode-company{
+	font-size: 18px;
 }
 .barcode_custom{
     width: 50mm;
@@ -136,6 +157,8 @@
 	font-weight: bold;
 	font-size: 10px;
 	text-align: center;
+	line-height: 1.1;
+	margin-top: 0;
 }
 
 .barcodea4 .head_barcode{
@@ -143,6 +166,8 @@
 	font-weight: bold;
 	font-size: 10px;
 	text-align: center;
+	line-height: 1.1;
+	margin-top: 0;
 }
 
 .barcode-name{
@@ -150,6 +175,7 @@
 	text-align: center;
 	font-weight: normal;
 	font-size: 8px;
+	line-height: 1.1;
 }
 
 .barcode-price{
@@ -157,6 +183,8 @@
 	text-align: center;
 	font-weight: 800;
 	font-size: 10px;
+	line-height: 1.1;
+	margin-top: 0;
 }
 
 .barcodea4 .style24 .head_barcode{
