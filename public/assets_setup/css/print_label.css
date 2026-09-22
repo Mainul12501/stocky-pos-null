@@ -50,7 +50,7 @@
 }
 
 .barcode-item .barcode{
-	margin-bottom: -1px;
+	margin-bottom: -5px;
 }
 
 .barcodea4 .style18 .barcode-company,
@@ -73,15 +73,17 @@
 }
 
 .barcode_custom .barcode-item {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	overflow: hidden;
 	text-align: center;
-	border: 1px dotted #CCC;
+	border: none;
 	font-size: 10px;
 	line-height: 14px;
 	text-transform: uppercase;
-	/* float: left; */
-} 
+}
 
 .barcode_custom .head_barcode{
 	padding-left: 10px;
@@ -89,22 +91,13 @@
 	text-align: left;
 }
 
-.barcode_custom .barcode-item {
-    display: block;
-    overflow: hidden;
-    text-align: center;
-    border: none; /* Remove borders for a cleaner look */
-    font-size: 10px;
-    line-height: 14px;
-    text-transform: uppercase;
-    /* float: left; */
-}
-
 .barcode_custom .head_barcode {
     padding-left: 10px;
     font-weight: bold;
     text-align: left;
     font-size: 14px;
+    position: relative;
+    z-index: 1;
 }
 
 .barcode_custom .style30 {
@@ -142,7 +135,10 @@
 }
 
 .barcode_non_a4 .barcode-item {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	overflow: hidden;
 	text-align: center;
 	border: 1px dotted #CCC;
@@ -159,6 +155,8 @@
 	text-align: center;
 	line-height: 1.1;
 	margin-top: 0;
+	position: relative;
+	z-index: 1;
 }
 
 .barcodea4 .head_barcode{
@@ -168,6 +166,8 @@
 	text-align: center;
 	line-height: 1.1;
 	margin-top: 0;
+	position: relative;
+	z-index: 1;
 }
 
 .barcode-name{
@@ -183,7 +183,7 @@
 	text-align: center;
 	font-weight: 800;
 	font-size: 10px;
-	line-height: 1.1;
+	line-height: 1.4;
 	margin-top: 0;
 }
 
@@ -211,7 +211,10 @@
 }
 
 .barcodea4 .barcode-item {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	overflow: hidden;
 	text-align: center;
 	border: 1px dotted #CCC;

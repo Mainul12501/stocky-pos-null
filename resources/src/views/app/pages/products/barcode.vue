@@ -927,7 +927,7 @@ export default {
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            justify-content: flex-start !important;
+            justify-content: center !important;
             width: 100% !important;
             max-width: 100% !important;
             height: 100% !important;
@@ -952,7 +952,7 @@ export default {
             text-overflow: ellipsis;
             flex-shrink: 0;
           }
-          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0 !important; flex-shrink: 1; min-height: 0; }
+          .barcode_custom .barcode { order: 2; max-width: 100%; margin: 0 !important; margin-bottom: -5px !important; flex-shrink: 1; min-height: 0; }
           .barcode_custom .barcode svg { display: block; max-width: 100%; margin: 0 auto; }
           .barcode_custom .head_barcode {
             order: 3;
@@ -962,16 +962,18 @@ export default {
             margin-top: -2px !important;
             color: #000 !important;
             flex-shrink: 0;
+            position: relative;
+            z-index: 1;
           }
           .barcode_custom .head_barcode .barcode-price {
             display: block;
             width: 100%;
             font-size: ${priceFontSize} !important;
             font-weight: 800 !important;
-            line-height: 1 !important;
+            line-height: 1.4 !important;
             margin-top: 0 !important;
             white-space: nowrap;
-            overflow: hidden;
+            overflow: visible;
           }
           .barcode_custom .head_barcode .barcode-name {
             display: block;
